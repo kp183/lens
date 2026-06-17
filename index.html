@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AgentLens | Flight Recorder for AI Agents</title>
+<meta name="description" content="AgentLens records, replays, and audits autonomous AI agent behavior for production teams." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f7faf7;
+    --muted: #a8b5ae;
+    --quiet: #6f7e76;
+    --night: #050907;
+    --panel: #0d1512;
+    --panel-2: #111f1b;
+    --line: rgba(215, 236, 224, 0.16);
+    --line-strong: rgba(215, 236, 224, 0.28);
+    --mint: #55f2a6;
+    --teal: #55d6d2;
+    --amber: #ffc861;
+    --coral: #ff746d;
+    --blue: #8ab4ff;
+    --shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
+    --sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button, input { font: inherit; }
+
+  .site-shell {
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(5, 9, 7, 0.08) 0%, var(--night) 90%),
+      radial-gradient(circle at 70% 18%, rgba(85, 242, 166, 0.08), transparent 30%),
+      linear-gradient(90deg, rgba(5, 9, 7, 0.97), rgba(5, 9, 7, 0.72) 48%, rgba(5, 9, 7, 0.88)),
+      url("agentlens-assets/agentlens-hero.png") center top / cover no-repeat;
+  }
+
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    padding: 18px clamp(20px, 5vw, 64px);
+    border-bottom: 1px solid rgba(215, 236, 224, 0.12);
+    background: rgba(5, 9, 7, 0.78);
+    backdrop-filter: blur(18px);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(85, 242, 166, 0.54);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(85, 242, 166, 0.26), rgba(85, 214, 210, 0.04)),
+      #0b1713;
+    position: relative;
+    box-shadow: 0 0 32px rgba(85, 242, 166, 0.14);
+  }
+
+  .brand-mark::before,
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(247, 250, 247, 0.72);
+    border-radius: 50%;
+  }
+
+  .brand-mark::after {
+    inset: 13px;
+    background: var(--mint);
+    border: 0;
+    box-shadow: 0 0 18px rgba(85, 242, 166, 0.8);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    font-weight: 700;
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(247, 250, 247, 0.45);
+  }
+
+  .button.primary {
+    color: #04110b;
+    border-color: rgba(85, 242, 166, 0.7);
+    background: linear-gradient(135deg, var(--mint), #c9ffd8);
+    box-shadow: 0 16px 45px rgba(85, 242, 166, 0.24);
+  }
+
+  .button.dark {
+    background: rgba(10, 18, 15, 0.74);
+  }
+
+  .hero {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    align-items: center;
+    padding: clamp(52px, 9vh, 92px) clamp(20px, 5vw, 64px) 44px;
+  }
+
+  .hero-inner {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.96fr) minmax(360px, 0.74fr);
+    gap: clamp(34px, 7vw, 96px);
+    align-items: end;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+    color: var(--mint);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 34px;
+    height: 1px;
+    background: var(--mint);
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 780px;
+    font-size: clamp(54px, 9vw, 112px);
+    line-height: 0.86;
+    letter-spacing: 0;
+    font-weight: 800;
+  }
+
+  .hero-copy {
+    max-width: 640px;
+    margin: 28px 0 0;
+    color: rgba(247, 250, 247, 0.82);
+    font-size: clamp(18px, 2vw, 22px);
+    line-height: 1.55;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 34px;
+  }
+
+  .hero-proof {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    width: min(650px, 100%);
+    margin-top: 44px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--line);
+  }
+
+  .proof-item {
+    min-height: 94px;
+    padding: 18px;
+    background: rgba(5, 9, 7, 0.78);
+  }
+
+  .proof-value {
+    display: block;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .proof-label {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .audit-panel {
+    align-self: center;
+    border: 1px solid rgba(215, 236, 224, 0.18);
+    border-radius: 8px;
+    background: rgba(9, 18, 15, 0.74);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(22px);
+    overflow: hidden;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px 16px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .status-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--mint);
+  }
+
+  .status-live::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 16px var(--mint);
+  }
+
+  .trace {
+    padding: 18px;
+  }
+
+  .trace-row {
+    display: grid;
+    grid-template-columns: 82px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(215, 236, 224, 0.1);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .trace-row:last-child { border-bottom: 0; }
+  .trace-time { color: var(--quiet); }
+  .trace-title { color: var(--ink); }
+  .trace-meta { display: block; margin-top: 4px; color: var(--quiet); }
+  .trace-ok { color: var(--mint); }
+  .trace-warn { color: var(--amber); }
+  .trace-stop { color: var(--coral); }
+
+  .risk-meter {
+    margin: 10px 18px 18px;
+    padding: 16px;
+    border: 1px solid rgba(255, 200, 97, 0.28);
+    border-radius: 8px;
+    background: rgba(255, 200, 97, 0.08);
+  }
+
+  .meter-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .meter-track {
+    height: 8px;
+    margin-top: 12px;
+    border-radius: 999px;
+    background: rgba(247, 250, 247, 0.1);
+    overflow: hidden;
+  }
+
+  .meter-fill {
+    height: 100%;
+    width: 78%;
+    background: linear-gradient(90deg, var(--mint), var(--amber), var(--coral));
+  }
+
+  .next-hint {
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+    padding-bottom: 20px;
+    color: var(--quiet);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  main {
+    background:
+      linear-gradient(180deg, rgba(5, 9, 7, 0.6), var(--night) 180px),
+      var(--night);
+  }
+
+  .section {
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: clamp(72px, 11vw, 128px) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .section:first-child { border-top: 0; }
+
+  .section-grid {
+    display: grid;
+    grid-template-columns: 0.78fr 1.22fr;
+    gap: clamp(36px, 8vw, 96px);
+    align-items: start;
+  }
+
+  .section-kicker {
+    margin: 0 0 14px;
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 64px);
+    line-height: 0.98;
+    letter-spacing: 0;
+  }
+
+  .section-lede {
+    margin: 22px 0 0;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.65;
+  }
+
+  .pain-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(17, 31, 27, 0.92), rgba(9, 16, 14, 0.86));
+    padding: 24px;
+    min-height: 260px;
+  }
+
+  .card small {
+    color: var(--quiet);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+
+  .card h3 {
+    margin: 32px 0 10px;
+    font-size: 21px;
+    line-height: 1.18;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .card.accent-coral { border-top-color: rgba(255, 116, 109, 0.65); }
+  .card.accent-amber { border-top-color: rgba(255, 200, 97, 0.65); }
+  .card.accent-blue { border-top-color: rgba(138, 180, 255, 0.65); }
+
+  .product-board {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 16px;
+  }
+
+  .timeline {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #07100d;
+    overflow: hidden;
+  }
+
+  .timeline-head {
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .timeline-step {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 13px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(215, 236, 224, 0.08);
+  }
+
+  .timeline-step:last-child { border-bottom: 0; }
+
+  .node {
+    width: 13px;
+    height: 13px;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 18px rgba(85, 242, 166, 0.8);
+  }
+
+  .node.warn { background: var(--amber); box-shadow: 0 0 18px rgba(255, 200, 97, 0.75); }
+  .node.stop { background: var(--coral); box-shadow: 0 0 18px rgba(255, 116, 109, 0.75); }
+
+  .timeline-title {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .timeline-copy {
+    margin: 5px 0 0;
+    color: var(--quiet);
+    font-size: 14px;
+  }
+
+  .evidence {
+    display: grid;
+    gap: 16px;
+  }
+
+  .evidence-block {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(17, 31, 27, 0.88), rgba(7, 16, 13, 0.92));
+    padding: 22px;
+  }
+
+  .evidence-block h3 {
+    margin: 0 0 10px;
+    font-size: 19px;
+  }
+
+  .evidence-block p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .integrations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    background: rgba(17, 31, 27, 0.58);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .who-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .who {
+    min-height: 170px;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(17, 31, 27, 0.72);
+  }
+
+  .who h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+
+  .who p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .quote-band {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 40px;
+    align-items: center;
+    padding: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(85, 242, 166, 0.11), rgba(85, 214, 210, 0.04)),
+      rgba(17, 31, 27, 0.78);
+  }
+
+  .quote-band strong {
+    display: block;
+    color: var(--mint);
+    font-family: var(--mono);
+    font-size: 13px;
+    text-transform: uppercase;
+  }
+
+  .quote-band p {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(24px, 4vw, 42px);
+    line-height: 1.05;
+    font-weight: 800;
+  }
+
+  .cta {
+    padding-bottom: clamp(72px, 10vw, 120px);
+  }
+
+  .cta-panel {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 28px;
+    align-items: end;
+    padding: clamp(28px, 6vw, 56px);
+    border: 1px solid rgba(85, 242, 166, 0.32);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(85, 242, 166, 0.16), rgba(255, 200, 97, 0.06) 52%, rgba(138, 180, 255, 0.08)),
+      #0a120f;
+    box-shadow: var(--shadow);
+  }
+
+  .cta h2 {
+    max-width: 760px;
+  }
+
+  .cta p {
+    max-width: 640px;
+    margin: 20px 0 0;
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  footer {
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 28px 0 38px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    color: var(--quiet);
+    font-size: 14px;
+  }
+
+  @media (max-width: 980px) {
+    .nav-links a:not(.button) { display: none; }
+    .hero { min-height: auto; }
+    .hero-inner,
+    .section-grid,
+    .product-board,
+    .quote-band,
+    .cta-panel {
+      grid-template-columns: 1fr;
+    }
+    .audit-panel { max-width: 620px; }
+    .pain-list,
+    .who-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .site-shell {
+      background:
+        linear-gradient(180deg, rgba(5, 9, 7, 0.36) 0%, var(--night) 86%),
+        linear-gradient(90deg, rgba(5, 9, 7, 0.96), rgba(5, 9, 7, 0.76)),
+        url("agentlens-assets/agentlens-hero.png") 58% top / auto 72vh no-repeat;
+    }
+    .nav { padding: 14px 20px; }
+    .button { width: 100%; }
+    .nav .button { width: auto; min-height: 38px; padding: 0 12px; }
+    .hero-proof,
+    .pain-list,
+    .who-grid {
+      grid-template-columns: 1fr;
+    }
+    .trace-row { grid-template-columns: 68px 1fr; }
+    .trace-row span:last-child { grid-column: 2; }
+    .card { min-height: auto; }
+    footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+  <div class="site-shell">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>AgentLens</span>
+      </a>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#product">Product</a>
+        <a href="#buyers">For teams</a>
+        <a href="https://github.com/kp183" target="_blank" rel="noreferrer">GitHub</a>
+        <a class="button dark" href="#demo">Request demo</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-inner">
+        <div>
+          <p class="eyebrow">AI agent audit infrastructure</p>
+          <h1>AgentLens</h1>
+          <p class="hero-copy">
+            A flight recorder for autonomous AI agents. Capture every prompt, tool call, approval,
+            memory access, decision path, and output so production teams can replay incidents,
+            prove what happened, and stop risky behavior before it spreads.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#demo">Book a 15-minute walkthrough</a>
+            <a class="button dark" href="#product">See the product story</a>
+          </div>
+          <div class="hero-proof" aria-label="AgentLens product pillars">
+            <div class="proof-item">
+              <span class="proof-value">Record</span>
+              <span class="proof-label">Immutable agent session trail</span>
+            </div>
+            <div class="proof-item">
+              <span class="proof-value">Replay</span>
+              <span class="proof-label">Step-level incident reconstruction</span>
+            </div>
+            <div class="proof-item">
+              <span class="proof-value">Govern</span>
+              <span class="proof-label">Policy, evidence, and review workflows</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="audit-panel" aria-label="Live AgentLens trace preview">
+          <div class="panel-head">
+            <span>production-agent / live audit</span>
+            <span class="status-live">recording</span>
+          </div>
+          <div class="trace">
+            <div class="trace-row">
+              <span class="trace-time">09:42:31</span>
+              <span><span class="trace-title">Task started</span><span class="trace-meta">customer-refund-agent / eu-west</span></span>
+              <span class="trace-ok">signed</span>
+            </div>
+            <div class="trace-row">
+              <span class="trace-time">09:42:35</span>
+              <span><span class="trace-title">Tool call: issue_refund</span><span class="trace-meta">amount exceeds policy threshold</span></span>
+              <span class="trace-warn">review</span>
+            </div>
+            <div class="trace-row">
+              <span class="trace-time">09:42:36</span>
+              <span><span class="trace-title">Memory read requested</span><span class="trace-meta">contains restricted customer note</span></span>
+              <span class="trace-stop">blocked</span>
+            </div>
+            <div class="trace-row">
+              <span class="trace-time">09:42:39</span>
+              <span><span class="trace-title">Evidence package generated</span><span class="trace-meta">trace, policy, approver, model metadata</span></span>
+              <span class="trace-ok">ready</span>
+            </div>
+          </div>
+          <div class="risk-meter">
+            <div class="meter-top"><span>risk score</span><span>78 / human review required</span></div>
+            <div class="meter-track"><div class="meter-fill"></div></div>
+          </div>
+        </aside>
+      </div>
+    </header>
+    <div class="next-hint">Scroll for the operating system behind accountable agents.</div>
+  </div>
+
+  <main>
+    <section class="section" id="problem">
+      <div class="section-grid">
+        <div>
+          <p class="section-kicker">Why this matters now</p>
+          <h2>Agents are becoming employees without managers.</h2>
+          <p class="section-lede">
+            The old observability stack can tell you latency, errors, and uptime. It cannot explain
+            why an autonomous agent opened a tool, used a memory, skipped an approval, or gave a
+            customer the wrong answer with total confidence.
+          </p>
+        </div>
+        <div class="pain-list">
+          <article class="card accent-coral">
+            <small>01 / Silent failure</small>
+            <h3>HTTP 200 does not mean the agent was right.</h3>
+            <p>Most incidents look successful at the API layer. The damage happens in the decision chain.</p>
+          </article>
+          <article class="card accent-amber">
+            <small>02 / Missing evidence</small>
+            <h3>Compliance cannot audit a black box.</h3>
+            <p>Legal, security, and risk teams need durable proof of inputs, outputs, approvals, and model behavior.</p>
+          </article>
+          <article class="card accent-blue">
+            <small>03 / Manual investigation</small>
+            <h3>Debugging agents is still detective work.</h3>
+            <p>Teams stitch logs, chat history, traces, tool records, and screenshots together after the incident.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="product">
+      <div class="section-grid">
+        <div>
+          <p class="section-kicker">What AgentLens does</p>
+          <h2>One audit layer across every agent run.</h2>
+          <p class="section-lede">
+            AgentLens sits beside your agent framework and creates a tamper-resistant record of the full workflow.
+            It is built for engineers who debug incidents and leaders who need defensible answers.
+          </p>
+          <div class="integrations" aria-label="Supported ecosystems">
+            <span class="pill">OpenAI</span>
+            <span class="pill">Anthropic</span>
+            <span class="pill">Gemini</span>
+            <span class="pill">LangGraph</span>
+            <span class="pill">CrewAI</span>
+            <span class="pill">FastAPI</span>
+            <span class="pill">PostgreSQL</span>
+            <span class="pill">SIEM export</span>
+          </div>
+        </div>
+
+        <div class="product-board">
+          <div class="timeline">
+            <div class="timeline-head">agent-session-8fa21 / replay</div>
+            <div class="timeline-step">
+              <span class="node"></span>
+              <div>
+                <p class="timeline-title">Prompt captured</p>
+                <p class="timeline-copy">System, user, retrieved context, and policy state preserved.</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <span class="node"></span>
+              <div>
+                <p class="timeline-title">Tool chain mapped</p>
+                <p class="timeline-copy">Every API call, permission, input, and output linked to the agent step.</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <span class="node warn"></span>
+              <div>
+                <p class="timeline-title">Risk scored</p>
+                <p class="timeline-copy">Policy, confidence, sensitive data, and approval gaps checked in real time.</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <span class="node stop"></span>
+              <div>
+                <p class="timeline-title">Action blocked</p>
+                <p class="timeline-copy">High-risk action routed to human review with evidence attached.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="evidence">
+            <article class="evidence-block">
+              <h3>Replay engine</h3>
+              <p>Reconstruct an incident exactly as it happened, step by step, without asking engineers to reverse-engineer the agent.</p>
+            </article>
+            <article class="evidence-block">
+              <h3>Evidence exports</h3>
+              <p>Create audit-ready reports for security, SOC 2, internal risk teams, and future AI regulation reviews.</p>
+            </article>
+            <article class="evidence-block">
+              <h3>Policy checkpoints</h3>
+              <p>Detect risky tool use, missing approvals, sensitive memory access, hallucination signals, and workflow drift.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="buyers">
+      <p class="section-kicker">Who needs this first</p>
+      <h2>Built for teams putting agents near money, data, and trust.</h2>
+      <div style="height: 32px"></div>
+      <div class="who-grid">
+        <article class="who">
+          <h3>AI platform teams</h3>
+          <p>Standardize tracing, replay, and governance before every internal team ships its own agent stack.</p>
+        </article>
+        <article class="who">
+          <h3>Security teams</h3>
+          <p>Understand tool abuse, data exposure, prompt injection, and agent actions across production systems.</p>
+        </article>
+        <article class="who">
+          <h3>Compliance teams</h3>
+          <p>Move from trust-me summaries to signed evidence trails that can survive scrutiny.</p>
+        </article>
+        <article class="who">
+          <h3>Founders and builders</h3>
+          <p>Ship agentic workflows faster with the audit layer enterprise buyers will eventually ask for.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="quote-band">
+        <strong>The thesis</strong>
+        <p>The next enterprise AI bottleneck is not model access. It is accountability.</p>
+      </div>
+    </section>
+
+    <section class="section cta" id="demo">
+      <div class="cta-panel">
+        <div>
+          <p class="section-kicker">Start with one agent</p>
+          <h2>Make your most important agent explainable by Friday.</h2>
+          <p>
+            Bring one workflow. AgentLens shows the trace, the replay, the risk points, and the evidence package
+            your engineering, security, and compliance teams can all understand.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <a class="button primary" href="mailto:hello@agentlens.ai?subject=AgentLens%20demo">Request demo</a>
+          <a class="button dark" href="https://github.com/kp183" target="_blank" rel="noreferrer">View GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AgentLens | Flight recorder for AI agents</span>
+    <span>Built by Kunal Ghanchi</span>
+  </footer>
+</body>
+</html>
