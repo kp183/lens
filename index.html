@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AgentLens | Flight Recorder for AI Agents</title>
-<meta name="description" content="AgentLens records, replays, and audits autonomous AI agent behavior for production teams." />
+<title>AgentLens | Tracing and Debugging for AI Agents</title>
+<meta name="description" content="AgentLens records, replays, and traces autonomous AI agent behavior for developers." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -205,6 +205,64 @@
     margin-top: 34px;
   }
 
+  .hero-code,
+  .cta-code {
+    width: min(650px, 100%);
+    margin-top: 34px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .code-header {
+    background: rgba(215, 236, 224, 0.04);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .code-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(215, 236, 224, 0.2);
+  }
+
+  .code-dot:nth-child(1) { background: #ff746d; }
+  .code-dot:nth-child(2) { background: #ffc861; }
+  .code-dot:nth-child(3) { background: #55f2a6; }
+
+  .code-title {
+    margin-left: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .hero-code pre,
+  .cta-code pre {
+    margin: 0;
+    padding: 16px 20px;
+    overflow-x: auto;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .hero-code code,
+  .cta-code code {
+    font-family: inherit;
+    color: var(--ink);
+  }
+
+  .code-comment { color: var(--quiet); }
+  .code-keyword { color: var(--mint); }
+  .code-string { color: var(--amber); }
+
   .hero-proof {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -299,36 +357,40 @@
   .trace-warn { color: var(--amber); }
   .trace-stop { color: var(--coral); }
 
-  .risk-meter {
+  .trace-stats {
     margin: 10px 18px 18px;
-    padding: 16px;
-    border: 1px solid rgba(255, 200, 97, 0.28);
+    padding: 14px 16px;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    background: rgba(255, 200, 97, 0.08);
+    background: rgba(85, 242, 166, 0.03);
   }
 
-  .meter-top {
+  .stats-row {
     display: flex;
     justify-content: space-between;
-    gap: 18px;
-    color: var(--amber);
+    gap: 12px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label {
+    color: var(--quiet);
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
-  .meter-track {
-    height: 8px;
-    margin-top: 12px;
-    border-radius: 999px;
-    background: rgba(247, 250, 247, 0.1);
-    overflow: hidden;
-  }
-
-  .meter-fill {
-    height: 100%;
-    width: 78%;
-    background: linear-gradient(90deg, var(--mint), var(--amber), var(--coral));
+  .stat-value {
+    color: var(--mint);
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .next-hint {
@@ -664,71 +726,70 @@
         <a href="#problem">Problem</a>
         <a href="#product">Product</a>
         <a href="#buyers">For teams</a>
-        <a href="https://github.com/kp183/Agentlens" target="_blank" rel="noreferrer">GitHub</a>
-        <a class="button dark" href="#demo">Request demo</a>
+        <a class="button dark" href="https://github.com/kp183/Agentlens" target="_blank" rel="noreferrer">GitHub</a>
       </div>
     </nav>
 
     <header class="hero">
       <div class="hero-inner">
         <div>
-          <p class="eyebrow">AI agent audit infrastructure</p>
-          <h1>AgentLens</h1>
+          <p class="eyebrow">Developer-first agent tracing</p>
+          <h1>Add two lines of code.<br>See everything your AI agent is doing.</h1>
           <p class="hero-copy">
-            A flight recorder for autonomous AI agents. Capture every prompt, tool call, approval,
-            memory access, decision path, and output so production teams can replay incidents,
-            prove what happened, and stop risky behavior before it spreads.
+            Real-time traces, span trees, token costs, and error tracking for every agent run. 
+            No dashboards to configure. No infra to manage. Works with OpenAI, Anthropic, and any Python agent.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#demo">Book a 15-minute walkthrough</a>
+            <a class="button primary" href="https://github.com/kp183/Agentlens" target="_blank" rel="noreferrer">Get Started Free</a>
             <a class="button dark" href="#product">See the product story</a>
           </div>
-          <div class="hero-proof" aria-label="AgentLens product pillars">
-            <div class="proof-item">
-              <span class="proof-value">Record</span>
-              <span class="proof-label">Immutable agent session trail</span>
+          <div class="hero-code">
+            <div class="code-header">
+              <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
+              <span class="code-title">Python Quickstart</span>
             </div>
-            <div class="proof-item">
-              <span class="proof-value">Replay</span>
-              <span class="proof-label">Step-level incident reconstruction</span>
-            </div>
-            <div class="proof-item">
-              <span class="proof-value">Govern</span>
-              <span class="proof-label">Policy, evidence, and review workflows</span>
-            </div>
+            <pre><code><span class="code-comment"># Install the SDK</span>
+$ pip install agentlens
+
+<span class="code-keyword">import</span> agentlens <span class="code-keyword">as</span> al
+al.init(api_key=<span class="code-string">"al_live_..."</span>)
+al.instrument_openai()  <span class="code-comment"># that's it — all calls now traced</span></code></pre>
           </div>
         </div>
 
         <aside class="audit-panel" aria-label="Live AgentLens trace preview">
           <div class="panel-head">
-            <span>production-agent / live audit</span>
+            <span>production-agent / live traces</span>
             <span class="status-live">recording</span>
           </div>
           <div class="trace">
             <div class="trace-row">
               <span class="trace-time">09:42:31</span>
-              <span><span class="trace-title">Task started</span><span class="trace-meta">customer-refund-agent / eu-west</span></span>
-              <span class="trace-ok">signed</span>
+              <span><span class="trace-title">Task started</span><span class="trace-meta">customer-support-agent / us-east</span></span>
+              <span class="trace-ok">run</span>
+            </div>
+            <div class="trace-row">
+              <span class="trace-time">09:42:33</span>
+              <span><span class="trace-title">Tool call: get_user_profile</span><span class="trace-meta">args: { "user_id": "usr_928" }</span></span>
+              <span class="trace-ok">ok</span>
             </div>
             <div class="trace-row">
               <span class="trace-time">09:42:35</span>
-              <span><span class="trace-title">Tool call: issue_refund</span><span class="trace-meta">amount exceeds policy threshold</span></span>
-              <span class="trace-warn">review</span>
+              <span><span class="trace-title">LLM call: gpt-4o</span><span class="trace-meta">input: 1,420 tkn | output: 420 tkn</span></span>
+              <span class="trace-ok">ok</span>
             </div>
             <div class="trace-row">
-              <span class="trace-time">09:42:36</span>
-              <span><span class="trace-title">Memory read requested</span><span class="trace-meta">contains restricted customer note</span></span>
-              <span class="trace-stop">blocked</span>
-            </div>
-            <div class="trace-row">
-              <span class="trace-time">09:42:39</span>
-              <span><span class="trace-title">Evidence package generated</span><span class="trace-meta">trace, policy, approver, model metadata</span></span>
-              <span class="trace-ok">ready</span>
+              <span class="trace-time">09:42:38</span>
+              <span><span class="trace-title">Error in Tool call: send_email</span><span class="trace-meta">SMTP Authentication Error</span></span>
+              <span class="trace-stop">failed</span>
             </div>
           </div>
-          <div class="risk-meter">
-            <div class="meter-top"><span>risk score</span><span>78 / human review required</span></div>
-            <div class="meter-track"><div class="meter-fill"></div></div>
+          <div class="trace-stats">
+            <div class="stats-row">
+              <div class="stat-item"><span class="stat-label">duration</span><span class="stat-value">1.4s</span></div>
+              <div class="stat-item"><span class="stat-label">tokens</span><span class="stat-value">1,840</span></div>
+              <div class="stat-item"><span class="stat-label">cost</span><span class="stat-value">$0.024</span></div>
+            </div>
           </div>
         </aside>
       </div>
@@ -740,29 +801,27 @@
     <section class="section" id="problem">
       <div class="section-grid">
         <div>
-          <p class="section-kicker">Why this matters now</p>
-          <h2>Agents are becoming employees without managers.</h2>
+          <p class="section-kicker">Observability for agents</p>
+          <h2>Standard observability doesn't work for agents.</h2>
           <p class="section-lede">
-            The old observability stack can tell you latency, errors, and uptime. It cannot explain
-            why an autonomous agent opened a tool, used a memory, skipped an approval, or gave a
-            customer the wrong answer with total confidence.
+            Traditional APM tools track network requests and system metrics. They can't show you why an agent made a specific decision, which tool was invoked with what arguments, or how a prompt led to a failure.
           </p>
         </div>
         <div class="pain-list">
           <article class="card accent-coral">
             <small>01 / Silent failure</small>
             <h3>HTTP 200 does not mean the agent was right.</h3>
-            <p>Most incidents look successful at the API layer. The damage happens in the decision chain.</p>
+            <p>Most agent errors look successful at the API layer. The bugs happen inside the decision chain.</p>
           </article>
           <article class="card accent-amber">
-            <small>02 / Missing evidence</small>
-            <h3>Compliance cannot audit a black box.</h3>
-            <p>Legal, security, and risk teams need durable proof of inputs, outputs, approvals, and model behavior.</p>
+            <small>02 / Complex chains</small>
+            <h3>Agents fail across multiple steps.</h3>
+            <p>A single query triggers a chain of LLM calls, tool executions, and vector DB queries. Traditional logs miss the context flow.</p>
           </article>
           <article class="card accent-blue">
-            <small>03 / Manual investigation</small>
-            <h3>Debugging agents is still detective work.</h3>
-            <p>Teams stitch logs, chat history, traces, tool records, and screenshots together after the incident.</p>
+            <small>03 / Detective work</small>
+            <h3>Debugging agents is still too manual.</h3>
+            <p>Developers spend hours stitching raw logs, database states, prompt strings, and JSON traces together after a run fails.</p>
           </article>
         </div>
       </div>
@@ -772,10 +831,10 @@
       <div class="section-grid">
         <div>
           <p class="section-kicker">What AgentLens does</p>
-          <h2>One audit layer across every agent run.</h2>
+          <h2>One trace layer across every agent run.</h2>
           <p class="section-lede">
-            AgentLens sits beside your agent framework and creates a tamper-resistant record of the full workflow.
-            It is built for engineers who debug incidents and leaders who need defensible answers.
+            AgentLens sits beside your agent framework and automatically captures the execution graph of your workflows.
+            It is built for developers who need to debug fast and understand exactly how their agents behave.
           </p>
           <div class="integrations" aria-label="Supported ecosystems">
             <span class="pill">OpenAI</span>
@@ -785,39 +844,38 @@
             <span class="pill">CrewAI</span>
             <span class="pill">FastAPI</span>
             <span class="pill">PostgreSQL</span>
-            <span class="pill">SIEM export</span>
           </div>
         </div>
 
         <div class="product-board">
           <div class="timeline">
-            <div class="timeline-head">agent-session-8fa21 / replay</div>
+            <div class="timeline-head">agent-session-8fa21 / trace</div>
             <div class="timeline-step">
               <span class="node"></span>
               <div>
                 <p class="timeline-title">Prompt captured</p>
-                <p class="timeline-copy">System, user, retrieved context, and policy state preserved.</p>
+                <p class="timeline-copy">System, user, retrieved context, and model parameters preserved.</p>
               </div>
             </div>
             <div class="timeline-step">
               <span class="node"></span>
               <div>
                 <p class="timeline-title">Tool chain mapped</p>
-                <p class="timeline-copy">Every API call, permission, input, and output linked to the agent step.</p>
+                <p class="timeline-copy">Every API call, function argument, input, and output linked to the step.</p>
               </div>
             </div>
             <div class="timeline-step">
               <span class="node warn"></span>
               <div>
-                <p class="timeline-title">Risk scored</p>
-                <p class="timeline-copy">Policy, confidence, sensitive data, and approval gaps checked in real time.</p>
+                <p class="timeline-title">Cost calculated</p>
+                <p class="timeline-copy">Token consumption, model pricing, and execution latency tracked in real time.</p>
               </div>
             </div>
             <div class="timeline-step">
               <span class="node stop"></span>
               <div>
-                <p class="timeline-title">Action blocked</p>
-                <p class="timeline-copy">High-risk action routed to human review with evidence attached.</p>
+                <p class="timeline-title">Error tracked</p>
+                <p class="timeline-copy">Exceptions, rate limits, and API failures logged with full stack context.</p>
               </div>
             </div>
           </div>
@@ -825,15 +883,15 @@
           <div class="evidence">
             <article class="evidence-block">
               <h3>Replay engine</h3>
-              <p>Reconstruct an incident exactly as it happened, step by step, without asking engineers to reverse-engineer the agent.</p>
+              <p>Reconstruct a run exactly as it happened, step by step, without asking engineers to guess the agent's internal state.</p>
             </article>
             <article class="evidence-block">
-              <h3>Evidence exports</h3>
-              <p>Create audit-ready reports for security, SOC 2, internal risk teams, and future AI regulation reviews.</p>
+              <h3>Span trees</h3>
+              <p>Visualise nested loops, parallel tool calls, and complex agent reasoning paths in a developer-friendly UI.</p>
             </article>
             <article class="evidence-block">
-              <h3>Policy checkpoints</h3>
-              <p>Detect risky tool use, missing approvals, sensitive memory access, hallucination signals, and workflow drift.</p>
+              <h3>Zero-config setup</h3>
+              <p>Instrument your OpenAI, Anthropic, or custom client with just a few lines of code and immediately see results.</p>
             </article>
           </div>
         </div>
@@ -842,24 +900,24 @@
 
     <section class="section" id="buyers">
       <p class="section-kicker">Who needs this first</p>
-      <h2>Built for teams putting agents near money, data, and trust.</h2>
+      <h2>Built for teams building production-ready AI agents.</h2>
       <div style="height: 32px"></div>
       <div class="who-grid">
         <article class="who">
           <h3>AI platform teams</h3>
-          <p>Standardize tracing, replay, and governance before every internal team ships its own agent stack.</p>
+          <p>Standardize tracing, replay, and debugging across all your internal agent applications.</p>
         </article>
         <article class="who">
-          <h3>Security teams</h3>
-          <p>Understand tool abuse, data exposure, prompt injection, and agent actions across production systems.</p>
-        </article>
-        <article class="who">
-          <h3>Compliance teams</h3>
-          <p>Move from trust-me summaries to signed evidence trails that can survive scrutiny.</p>
+          <h3>Software engineers</h3>
+          <p>Debug multi-agent reasoning paths, parallel tool executions, and state variables in a unified trace UI.</p>
         </article>
         <article class="who">
           <h3>Founders and builders</h3>
-          <p>Ship agentic workflows faster with the audit layer enterprise buyers will eventually ask for.</p>
+          <p>Ship agentic workflows faster with the observability layer you need to scale from MVP to production.</p>
+        </article>
+        <article class="who">
+          <h3>Product managers</h3>
+          <p>Analyze token consumption, evaluate agent success rates, and monitor real-user interactions.</p>
         </article>
       </div>
     </section>
@@ -867,35 +925,44 @@
     <section class="section">
       <div class="quote-band">
         <strong>The thesis</strong>
-        <p>The next enterprise AI bottleneck is not model access. It is accountability.</p>
+        <p>The hardest part of building AI agents isn't the model. It's understanding what they do.</p>
       </div>
     </section>
 
-    <section class="section cta" id="demo">
+    <section class="section cta" id="get-started">
       <div class="cta-panel">
         <div>
-          <p class="section-kicker">Start with one agent</p>
-          <h2>Make your most important agent explainable by Friday.</h2>
+          <p class="section-kicker">Start tracing in minutes</p>
+          <h2>Understand your agentic workflows today.</h2>
           <p>
-            Bring one workflow. AgentLens shows the trace, the replay, the risk points, and the evidence package
-            your engineering, security, and compliance teams can all understand.
+            Install the open-source SDK, initialize it in your code, and see every prompt, 
+            tool call, and token cost visualised instantly.
           </p>
-          <div style="margin-top: 32px;">
+          <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+            <a class="button primary" href="https://github.com/kp183/Agentlens" target="_blank" rel="noreferrer">Get Started Free</a>
             <a class="button dark" href="https://github.com/kp183/Agentlens" target="_blank" rel="noreferrer">View GitHub</a>
           </div>
         </div>
-        <div>
-          <!-- Calendly inline widget begin -->
-          <div class="calendly-inline-widget" data-url="https://calendly.com/kunalghanchi393/30min?background_color=0a120f&text_color=f7faf7&primary_color=55f2a6" style="min-width:320px;width:100%;height:700px;border-radius:8px;overflow:hidden;"></div>
-          <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-          <!-- Calendly inline widget end -->
+        <div class="cta-code">
+          <div class="code-header">
+            <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
+            <span class="code-title">quickstart.py</span>
+          </div>
+          <pre><code><span class="code-comment"># 1. Install agentlens</span>
+$ pip install agentlens
+
+<span class="code-comment"># 2. Add to your script</span>
+<span class="code-keyword">import</span> agentlens <span class="code-keyword">as</span> al
+
+al.init(api_key=<span class="code-string">"al_live_..."</span>)
+al.instrument_openai()  <span class="code-comment"># traces all calls</span></code></pre>
         </div>
       </div>
     </section>
   </main>
 
   <footer>
-    <span>AgentLens | Flight recorder for AI agents</span>
+    <span>AgentLens | Developer tracing for AI agents</span>
     <span>Built by Kunal Ghanchi</span>
   </footer>
 </body>
